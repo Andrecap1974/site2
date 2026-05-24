@@ -15,8 +15,13 @@ export interface Region {
 export interface GalleryItem {
   id: string;
   imageUrl: string;
-  alt: string;
+  alt: string; // Used as image alt and primary legend
   category: string;
+  title?: string; // Optional title
+  seoLink?: string; // Custom link for SEO
+  seoAnchorText?: string; // Custom anchor text for SEO
+  socialMediaName?: string; // Network name (Instagram, etc)
+  socialMediaUrl?: string; // Network link
 }
 
 export interface DogReview {
