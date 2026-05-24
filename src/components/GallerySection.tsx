@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Camera, Sparkles, SlidersHorizontal, Maximize2, X, 
-  Plus, Edit2, Trash2, Globe, RefreshCw, Instagram, Link2, Check, ExternalLink, Settings, Eye
+  Plus, Edit2, Trash2, Globe, RefreshCw, Instagram, Link2, Check, ExternalLink, Settings, Eye,
+  Upload
 } from "lucide-react";
 import { GalleryItem } from "../types";
 
@@ -140,6 +141,38 @@ export default function GallerySection() {
     localStorage.setItem("cma_gallery_items", JSON.stringify(newItems));
   };
 
+  const handleLocalFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      showToast("Por favor, selecione um arquivo de imagem válido (PNG, JPG, WebP).");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      if (!base64) return;
+
+      const fileNameClean = file.name.split('.')[0] || "Nova Imagem";
+      setEditingItem({
+        id: "gal-" + Date.now(),
+        imageUrl: base64,
+        title: fileNameClean,
+        alt: `${fileNameClean} - Adestramento profissional cão meu amigo São Leopoldo RS`,
+        category: "obediencia",
+        seoLink: "http://www.caomeuamigo.net/adestramento-sao-leopoldo",
+        seoAnchorText: "Adestramento de Cães Vale do Sinos",
+        socialMediaName: "Instagram",
+        socialMediaUrl: "https://www.instagram.com/caomeuamigo_adestramento/"
+      });
+      showToast("Imagem carregada do computador! Configure os metadados abaixo.");
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
   const filters = [
     { value: "todos", label: "Ver Todos" },
     { value: "obediencia", label: "Obediência" },
@@ -266,33 +299,126 @@ export default function GallerySection() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="p-6 rounded-2xl bg-[#D4AF37]/5 border border-[#D4AF37]/20 flex flex-col sm:flex-row items-center justify-between gap-4"
+              className="p-6 md:p-8 rounded-2xl bg-[#121212]/95 border border-[#D4AF37]/30 grid grid-cols-1 lg:grid-cols-12 gap-8 shadow-2xl relative overflow-hidden"
             >
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-[#D4AF37] flex items-center gap-1.5">
-                  <SlidersHorizontal className="w-4 h-4" />
-                  Painel de Otimização e Controle de SEO
-                </p>
-                <p className="text-xs text-gray-300">
-                  Adicione novas imagens, defina títulos, atribua textos alternativos ("alt") ricos em palavras-chave para o Google e integre links de redirecionamento ou postagens sociais.
-                </p>
+              {/* Background amber glow */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/5 rounded-full blur-2xl pointer-events-none" />
+
+              {/* Column 1: Core Action Controls & File Upload Dropzone (7 Cols on desktop) */}
+              <div className="lg:col-span-7 space-y-6 flex flex-col justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-[#D4AF37] flex items-center gap-1.5 font-mono">
+                    <SlidersHorizontal className="w-4 h-4 animate-pulse" />
+                    PAINEL DE MEDIA & OTIMIZAÇÃO DE SEO CANINO
+                  </p>
+                  <p className="text-xs text-gray-300 leading-relaxed font-light">
+                    Carregue fotos reais diretamente do seu computador ou defina links de terceiros.
+                    Toda foto adicionada pode ser associada a links otimizados de SEO de busca regional da <span className="text-[#D4AF37]">Cão Meu Amigo</span>, elevando o engajamento local.
+                  </p>
+                </div>
+
+                {/* Upload Zone & Manual ADD Buttons */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Local Computer File Upload Box */}
+                  <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#D4AF37]/30 hover:border-[#D4AF37]/80 rounded-xl bg-white/3 hover:bg-white/5 transition-all cursor-pointer group text-center space-y-2.5">
+                    <div className="p-3 bg-[#D4AF37]/15 rounded-full text-[#D4AF37] group-hover:scale-110 transition-transform">
+                      <Upload className="w-5 h-5" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="text-xs font-bold text-white block">Carregar do Computador</span>
+                      <span className="text-[10px] text-gray-400 block font-light">Selecione JPG, PNG, WebP do seu PC</span>
+                    </div>
+                    <input 
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleLocalFileUpload}
+                    />
+                  </label>
+
+                  {/* Regular Manual URL + Action Buttons Block */}
+                  <div className="flex flex-col gap-3 justify-center">
+                    <button
+                      onClick={handleAddNewItem}
+                      className="w-full px-4 py-3 bg-[#D4AF37] text-black rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-white transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Adicionar por URL
+                    </button>
+                    
+                    <button
+                      onClick={handleRestoreDefaults}
+                      className="w-full px-4 py-3 bg-white/5 text-gray-300 border border-white/10 rounded-lg text-xs font-medium uppercase tracking-wider hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                      title="Restaurar galeria inicial de demonstração"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      Restaurar Inicial
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2.5 shrink-0">
-                <button
-                  onClick={handleAddNewItem}
-                  className="px-4 py-2.5 bg-[#D4AF37] text-black rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-white transition-colors flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  Adicionar Foto
-                </button>
-                <button
-                  onClick={handleRestoreDefaults}
-                  className="px-4 py-2.5 bg-white/5 text-gray-300 border border-white/10 rounded-lg text-xs font-medium hover:bg-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
-                  title="Restaurar elenco original"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  Redefinir Padrões
-                </button>
+
+              {/* Column 2: Compact Management List with Easy Deletion and Editing (5 Cols on desktop) */}
+              <div className="lg:col-span-5 flex flex-col space-y-3">
+                <span className="text-xs font-mono font-bold tracking-wider text-gray-400 uppercase flex items-center justify-between">
+                  <span>Lista de Imagens Ativas ({items.length})</span>
+                  <span className="text-[10px] text-[#D4AF37]/85 font-semibold">Exclusão Rápida</span>
+                </span>
+
+                {/* Styled list wrapper with scroll */}
+                <div className="max-h-56 overflow-y-auto pr-1 border border-white/5 rounded-xl bg-black/40 overflow-x-hidden space-y-1.5 p-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                  {items.length === 0 ? (
+                    <div className="py-12 text-center text-xs text-gray-500 font-light">
+                      Nenhuma imagem na galeria. Adicione acima ou restaure os padrões.
+                    </div>
+                  ) : (
+                    items.map((item, idx) => (
+                      <div 
+                        key={item.id} 
+                        className="flex items-center justify-between p-2 rounded-lg bg-white/3 border border-white/5 hover:border-white/10 transition-all text-xs"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                          {/* Thumbnail */}
+                          <img 
+                            src={item.imageUrl} 
+                            alt={item.alt} 
+                            referrerPolicy="no-referrer"
+                            className="w-10 h-10 object-cover rounded-md bg-black shrink-0 border border-white/10"
+                          />
+                          <div className="min-w-0">
+                            <p className="text-white font-medium truncate">
+                              {item.title || `Imagem #${idx + 1}`}
+                            </p>
+                            <span className="text-[10px] text-gray-400 block truncate font-mono uppercase">
+                              {filters.find(f => f.value === item.category)?.label || item.category}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Direct action buttons in the list item */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={(e) => handleEditItem(item, e)}
+                            className="p-1.5 rounded bg-white/5 hover:bg-[#D4AF37] hover:text-black text-gray-300 transition-colors cursor-pointer"
+                            title="Editar metadados"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => handleDeleteItem(item.id, e)}
+                            className="p-1.5 rounded bg-white/5 hover:bg-red-600 hover:text-white text-gray-300 transition-colors cursor-pointer"
+                            title="Excluir imagem"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </motion.div>
           )}
@@ -589,6 +715,32 @@ export default function GallerySection() {
                     onChange={(e) => setEditingItem({ ...editingItem, imageUrl: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-black/40 border border-white/10 rounded-lg text-sm text-mono text-white placeholder-gray-500 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all"
                   />
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <span className="text-[10px] text-gray-500">Ou envie um arquivo do seu computador:</span>
+                    <label className="px-2.5 py-1 rounded bg-white/5 border border-white/10 text-[10px] font-mono text-[#D4AF37] hover:bg-[#D4AF37]/20 cursor-pointer transition-colors inline-flex items-center gap-1">
+                      <Upload className="w-3 h-3" />
+                      Selecionar Arquivo do PC
+                      <input 
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(ev) => {
+                          const file = ev.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              const base64 = event.target?.result as string;
+                              if (base64) {
+                                setEditingItem({ ...editingItem, imageUrl: base64 });
+                                showToast("Foto local carregada no formulário!");
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
 
                 {/* SEO Redirection Link Configuration */}
