@@ -438,7 +438,7 @@ export default function GallerySection() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.4 }}
-                className="group relative h-80 rounded-2xl overflow-hidden bg-white/3 border border-white/5 cursor-pointer"
+                className="group relative h-52 sm:h-64 md:h-72 lg:h-80 rounded-2xl overflow-hidden bg-white/3 border border-white/5 cursor-pointer"
                 onClick={() => setLightboxItem(item)}
               >
                 <img
