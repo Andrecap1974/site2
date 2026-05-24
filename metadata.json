@@ -1,0 +1,8 @@
+{
+  "name": "Cão Meu Amigo Adestramento",
+  "description": "Site moderno, elegante e criativo de adestramento profissional de cães. Atendimento qualificado em São Leopoldo, Novo Hamburgo e toda a região do Vale do Sinos com mais de 18 anos de experiência.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
